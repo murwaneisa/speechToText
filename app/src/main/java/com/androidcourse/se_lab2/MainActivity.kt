@@ -33,11 +33,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidcourse.se_lab2.ui.theme.SElab2Theme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
+import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.initialize
 
 class MainActivity : ComponentActivity() {
     private lateinit var database: DatabaseReference
@@ -68,7 +75,6 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwitchWithImageExample(checked: Boolean, onCheckedChange: (Boolean) -> Unit,checkedImage: Int, uncheckedImage: Int) {
-    var checked by remember { mutableStateOf(true) }
     Row(verticalAlignment = Alignment.CenterVertically) {
     Switch(
         checked = checked,
@@ -117,7 +123,7 @@ fun ScaffoldExample(database: DatabaseReference) {
     database.child("window").addValueEventListener(object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             val doorValue = dataSnapshot.getValue(Boolean::class.java) ?: false
-            Log.d("FirebaseLab2", "Door value in the fetch: $doorValue")
+            Log.d("FirebaseLab2", "Window value in the fetch: $doorValue")
             windowSwitchState = doorValue
         }
         override fun onCancelled(databaseError: DatabaseError) {
@@ -127,7 +133,7 @@ fun ScaffoldExample(database: DatabaseReference) {
     database.child("light").addValueEventListener(object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             val doorValue = dataSnapshot.getValue(Boolean::class.java) ?: false
-            Log.d("FirebaseLab2", "Door value in the fetch: $doorValue")
+            Log.d("FirebaseLab2", "Light value in the fetch: $doorValue")
             lightSwitchState = doorValue
         }
         override fun onCancelled(databaseError: DatabaseError) {
@@ -191,6 +197,7 @@ fun ScaffoldExample(database: DatabaseReference) {
                     doorSwitchState,
                     { newChecked ->
                         doorSwitchState = newChecked
+                        database.child("door").setValue(newChecked)
                     },
                     checkedImage = R.drawable.door_open,
                     uncheckedImage = R.drawable.door_shut
@@ -209,6 +216,7 @@ fun ScaffoldExample(database: DatabaseReference) {
                     windowSwitchState,
                     { newChecked ->
                         windowSwitchState = newChecked
+                        database.child("window").setValue(newChecked)
                     },
                     checkedImage = R.drawable.window_open,
                     uncheckedImage =R.drawable.window_shut
@@ -227,6 +235,7 @@ fun ScaffoldExample(database: DatabaseReference) {
                     lightSwitchState,
                     { newChecked ->
                        lightSwitchState = newChecked
+                        database.child("light").setValue(newChecked)
                     },
                     checkedImage = R.drawable.light_on,
                     uncheckedImage = R.drawable.light_off
