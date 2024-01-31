@@ -1,6 +1,7 @@
 package com.androidcourse.se_lab2
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -31,15 +32,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidcourse.se_lab2.ui.theme.SElab2Theme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
 
 class MainActivity : ComponentActivity() {
+    private lateinit var database: DatabaseReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize Firebase
+        Firebase.initialize(this)
+
+        // Initialize Firebase Realtime Database reference
+        database = FirebaseDatabase.getInstance().reference
+
         setContent {
             SElab2Theme {
                 // A surface container using the 'background' color from the theme
@@ -47,22 +63,19 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    //Greeting("Android")
-                    ScaffoldExample()
+                    ScaffoldExample(database)
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SwitchWithIconExample() {
-    var checked by remember { mutableStateOf(true) }
+fun SwitchWithIconExample(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Switch(
         checked = checked,
-        onCheckedChange = {
-            checked = it
+        onCheckedChange = { newChecked ->
+            onCheckedChange(newChecked)
         },
         thumbContent = if (checked) {
             {
@@ -71,7 +84,6 @@ fun SwitchWithIconExample() {
                     contentDescription = null,
                     modifier = Modifier.size(SwitchDefaults.IconSize),
                 )
-
             }
         } else {
             null
@@ -79,9 +91,46 @@ fun SwitchWithIconExample() {
     )
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldExample() {
+fun ScaffoldExample(database: DatabaseReference) {
+    // Read and write values for "door," "window," and "light"
+    var doorSwitchState by remember { mutableStateOf(false) }
+    var windowSwitchState by remember { mutableStateOf(false) }
+    var lightSwitchState by remember { mutableStateOf(false) }
+    // Read initial values from Firebase
+    database.child("door").addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val doorValue = dataSnapshot.getValue(Boolean::class.java) ?: false
+            Log.d("FirebaseLab2", "Door value in the fetch: $doorValue")
+            doorSwitchState = doorValue
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            // Handle any errors
+        }
+    })
+    database.child("window").addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val doorValue = dataSnapshot.getValue(Boolean::class.java) ?: false
+            Log.d("FirebaseLab2", "Door value in the fetch: $doorValue")
+            windowSwitchState = doorValue
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            // Handle any errors
+        }
+    })
+    database.child("light").addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val doorValue = dataSnapshot.getValue(Boolean::class.java) ?: false
+            Log.d("FirebaseLab2", "Door value in the fetch: $doorValue")
+            lightSwitchState = doorValue
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            // Handle any errors
+        }
+    })
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -118,6 +167,7 @@ fun ScaffoldExample() {
                 .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+
             Text(
                 modifier = Modifier.padding(8.dp),
                 text =
@@ -132,7 +182,9 @@ fun ScaffoldExample() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(text = "Door")
-                SwitchWithIconExample()
+                SwitchWithIconExample(doorSwitchState) { newChecked ->
+                    doorSwitchState = newChecked
+                }
             }
             //window
             Row(
@@ -143,7 +195,9 @@ fun ScaffoldExample() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(text = "Window")
-                SwitchWithIconExample()
+                SwitchWithIconExample(windowSwitchState) { newChecked ->
+                    windowSwitchState = newChecked
+                }
             }
             //light
             Row(
@@ -154,7 +208,9 @@ fun ScaffoldExample() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(text = "light")
-                SwitchWithIconExample()
+                SwitchWithIconExample(lightSwitchState) { newChecked ->
+                    doorSwitchState = newChecked
+                }
             }
         }
     }

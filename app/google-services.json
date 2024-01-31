@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "630627043788",
+    "firebase_url": "https://se-lab2-3aec5-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "se-lab2-3aec5",
+    "storage_bucket": "se-lab2-3aec5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:630627043788:android:ec3a022d413b2f22777569",
+        "android_client_info": {
+          "package_name": "com.androidcourse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbDzBwr6U8SWgM66qUBENQAH56Qny8y80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:630627043788:android:043966a3c4010d0c777569",
+        "android_client_info": {
+          "package_name": "com.androidcourse.se_lab2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbDzBwr6U8SWgM66qUBENQAH56Qny8y80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
