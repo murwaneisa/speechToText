@@ -67,11 +67,11 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     //speech
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07")
-    implementation ("androidx.activity:activity-compose:1.3.0-alpha02")
-    implementation ("androidx.compose.ui:ui-textinput:1.1.0-alpha01")
-    implementation( "androidx.hilt:hilt-navigation-compose:1.0.0-alpha03")
-    implementation ("androidx.hilt:hilt-work:1.0.0-alpha03")
-    implementation ("androidx.activity:activity-compose:1.3.0")
+//    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07")
+//    implementation ("androidx.activity:activity-compose:1.3.0-alpha02")
+//    implementation ("androidx.compose.ui:ui-textinput:1.1.0-alpha01")
+//    implementation( "androidx.hilt:hilt-navigation-compose:1.0.0-alpha03")
+//    implementation ("androidx.hilt:hilt-work:1.0.0-alpha03")
+//    implementation ("androidx.activity:activity-compose:1.3.0")
 
 }

@@ -3,6 +3,7 @@ package com.androidcourse.se_lab2
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,11 +32,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidcourse.se_lab2.ui.theme.SElab2Theme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,8 +58,9 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SwitchWithIconExample() {
+fun SwitchWithImageExample(checkedImage: Int, uncheckedImage: Int) {
     var checked by remember { mutableStateOf(true) }
+    Row(verticalAlignment = Alignment.CenterVertically) {
     Switch(
         checked = checked,
         onCheckedChange = {
@@ -77,6 +79,12 @@ fun SwitchWithIconExample() {
             null
         }
     )
+    Image(
+        painter = painterResource(id = if (checked) checkedImage else uncheckedImage),
+        contentDescription = null, // Provide appropriate descriptions for accessibility
+        modifier = Modifier.size(48.dp) // Adjust size as needed
+    )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -132,7 +140,11 @@ fun ScaffoldExample() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(text = "Door")
-                SwitchWithIconExample()
+                // Use the new composable with image resources for the door
+                SwitchWithImageExample(
+                    checkedImage = R.drawable.door_open,
+                    uncheckedImage = R.drawable.door_shut
+                )
             }
             //window
             Row(
@@ -143,7 +155,10 @@ fun ScaffoldExample() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(text = "Window")
-                SwitchWithIconExample()
+                SwitchWithImageExample(
+                    checkedImage = R.drawable.window_open,
+                    uncheckedImage =R.drawable.window_shut
+                )
             }
             //light
             Row(
@@ -154,7 +169,10 @@ fun ScaffoldExample() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(text = "light")
-                SwitchWithIconExample()
+                SwitchWithImageExample(
+                    checkedImage = R.drawable.light_on,
+                    uncheckedImage = R.drawable.light_off
+                )
             }
         }
     }
