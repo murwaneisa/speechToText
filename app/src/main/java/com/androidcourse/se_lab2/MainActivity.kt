@@ -1,6 +1,11 @@
 package com.androidcourse.se_lab2
 
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,10 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -32,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.androidcourse.se_lab2.ui.theme.SElab2Theme
 import androidx.compose.runtime.*
@@ -45,18 +47,81 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.initialize
+import android.Manifest
+import androidx.compose.material3.Button
 
 class MainActivity : ComponentActivity() {
     private lateinit var database: DatabaseReference
+    private lateinit var speechRecognizer: SpeechRecognizer
+    private lateinit var speechRecognizerIntent: Intent
 
+    private fun onStartRecording() {
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            speechRecognizer.startListening(speechRecognizerIntent)
+        } else {
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO_PERMISSION)
+        }
+    }
+
+    private fun onStopRecording() {
+        speechRecognizer.stopListening()
+    }
+
+    companion object {
+        private const val REQUEST_RECORD_AUDIO_PERMISSION = 1
+    }
+    private fun handleSpokenText(text: String) {
+        when {
+            "door" in text && "open" in text -> updateState("door", true)
+            "door" in text && ("close" in text || "shut" in text) -> updateState("door", false)
+
+            "window" in text && "open" in text -> updateState("window", true)
+            "window" in text && ("close" in text || "shut" in text) -> updateState("window", false)
+
+            "light" in text && "on" in text -> updateState("light", true)
+            "light" in text && ("close" in text || "off" in text) -> updateState("light", false)
+        }
+    }
+
+    private fun updateState(node: String, state: Boolean) {
+        database.child(node).setValue(state)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Initialize Firebase
         Firebase.initialize(this)
-
         // Initialize Firebase Realtime Database reference
         database = FirebaseDatabase.getInstance().reference
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
+            setRecognitionListener(object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) {}
+                override fun onBeginningOfSpeech() {}
+                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onBufferReceived(buffer: ByteArray?) {}
+                override fun onEndOfSpeech() {}
+                override fun onError(error: Int) {}
+                override fun onResults(results: Bundle?) {
+                    val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    if (!matches.isNullOrEmpty()) {
+                        val text = matches[0]
+                        Log.d("SpeechRecognition", "Recognized Words: $text") // Log the recognized words
+                        handleSpokenText(text)
+                    }
+                }
+
+                override fun onPartialResults(partialResults: Bundle?) {}
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+            })
+        }
+        speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
 
         setContent {
             SElab2Theme {
@@ -65,7 +130,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ScaffoldExample(database)
+                    val isRecording = remember { mutableStateOf(false) }
+                    ScaffoldExample(database,isRecording = isRecording,
+                        onStartRecording = ::onStartRecording,
+                        onStopRecording = ::onStopRecording)
                 }
             }
         }
@@ -104,7 +172,9 @@ fun SwitchWithImageExample(checked: Boolean, onCheckedChange: (Boolean) -> Unit,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldExample(database: DatabaseReference) {
+fun ScaffoldExample(database: DatabaseReference, isRecording: MutableState<Boolean>,
+                    onStartRecording: () -> Unit,
+                    onStopRecording: () -> Unit) {
     // Read and write values for "door," "window," and "light"
     var doorSwitchState by remember { mutableStateOf(false) }
     var windowSwitchState by remember { mutableStateOf(false) }
@@ -154,21 +224,21 @@ fun ScaffoldExample(database: DatabaseReference) {
             )
         },
         bottomBar = {
-            BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.primary,
-            ) {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = "footer ",
-                )
-            }
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {  }) {
-                Icon(Icons.Default.Face, contentDescription = "Speech")
+            BottomAppBar {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        // Toggle the recording state
+                        isRecording.value = !isRecording.value
+                        if (isRecording.value) {
+                            onStartRecording()
+                        } else {
+                            onStopRecording()
+                        }
+                    }
+                ) {
+                    Text(if (isRecording.value) "Tap Once More to Stop" else "Tap to Record")
+                }
             }
         }
     ) { innerPadding ->
