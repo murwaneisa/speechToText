@@ -71,15 +71,16 @@ class MainActivity : ComponentActivity() {
         private const val REQUEST_RECORD_AUDIO_PERMISSION = 1
     }
     private fun handleSpokenText(text: String) {
+        val lowercaseText= text.lowercase()
         when {
-            "door" in text && "open" in text -> updateState("door", true)
-            "door" in text && ("close" in text || "shut" in text) -> updateState("door", false)
+            "door" in lowercaseText && "open" in lowercaseText -> updateState("door", true)
+            "door" in lowercaseText && ("close" in lowercaseText || "shut" in lowercaseText) -> updateState("door", false)
 
-            "window" in text && "open" in text -> updateState("window", true)
-            "window" in text && ("close" in text || "shut" in text) -> updateState("window", false)
+            "window" in lowercaseText && "open" in lowercaseText -> updateState("window", true)
+            "window" in lowercaseText && ("close" in lowercaseText || "shut" in lowercaseText) -> updateState("window", false)
 
-            "light" in text && "on" in text -> updateState("light", true)
-            "light" in text && ("close" in text || "off" in text) -> updateState("light", false)
+            "light" in lowercaseText && "on" in lowercaseText -> updateState("light", true)
+            "light" in lowercaseText && ("close" in lowercaseText || "off" in lowercaseText) -> updateState("light", false)
         }
     }
 
